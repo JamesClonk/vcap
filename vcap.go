@@ -37,7 +37,7 @@ func (t *Timestamp) String() string {
 }
 
 func (t *Timestamp) UnmarshalJSON(b []byte) error {
-	ts, err := strconv.ParseInt(tm, 10, 64)
+	ts, err := strconv.ParseInt(string(b), 10, 64)
 	if err != nil {
 		return err
 	}
