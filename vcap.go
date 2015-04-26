@@ -58,6 +58,15 @@ func (t *Timestamp) UnmarshalJSON(b []byte) error {
 func New() (*VCAP, error) {
 	vcap := &VCAP{}
 
+	vcap.Host = os.Getenv("VCAP_APP_HOST")
+	if port := os.Getenv("VCAP_APP_PORT"); port != "" {
+		p, err := strconv.ParseInt(port, 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		vcap.Port = int(p)
+	}
+
 	if app := os.Getenv("VCAP_APPLICATION"); app != "" {
 		if err := json.Unmarshal([]byte(app), &(vcap.Application)); err != nil {
 			return nil, err
@@ -68,15 +77,6 @@ func New() (*VCAP, error) {
 		if err := json.Unmarshal([]byte(serv), &(vcap.Services)); err != nil {
 			return nil, err
 		}
-	}
-
-	vcap.Host = os.Getenv("VCAP_APP_HOST")
-	if port := os.Getenv("VCAP_APP_PORT"); port != "" {
-		p, err := strconv.ParseInt(port, 10, 32)
-		if err != nil {
-			return nil, err
-		}
-		vcap.Port = int(p)
 	}
 
 	// set some defaults in case of local development / missing VCAP_APPLICATION
