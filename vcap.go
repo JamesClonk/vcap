@@ -26,8 +26,15 @@ type VCAP struct {
 		Started *Timestamp `json:"started_at_timestamp"`
 		State   *Timestamp `json:"state_timestamp"`
 	}
-	Host string
-	Port int
+	Host     string
+	Port     int
+	Services map[string][]struct {
+		Name        string            `json:"name"`
+		Label       string            `json:"label"`
+		Tags        []string          `json:"tags"`
+		Plan        string            `json:"plan"`
+		Credentials map[string]string `json:"credentials"`
+	}
 }
 
 type Timestamp time.Time
@@ -51,6 +58,12 @@ func New() (*VCAP, error) {
 
 	if app := os.Getenv("VCAP_APPLICATION"); app != "" {
 		if err := json.Unmarshal([]byte(app), &(vcap.Application)); err != nil {
+			return nil, err
+		}
+	}
+
+	if serv := os.Getenv("VCAP_SERVICES"); serv != "" {
+		if err := json.Unmarshal([]byte(serv), &(vcap.Services)); err != nil {
 			return nil, err
 		}
 	}
