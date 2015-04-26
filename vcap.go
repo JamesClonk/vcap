@@ -23,11 +23,27 @@ type VCAP struct {
 			Disk   int `json:"disk"`
 			Files  int `json:"fds"`
 		} `json:"limits"`
-		Started *time.Time `json:"started_at_timestamp"`
-		State   *time.Time `json:"state_timestamp"`
+		Started *Timestamp `json:"started_at_timestamp"`
+		State   *Timestamp `json:"state_timestamp"`
 	}
 	Host string
 	Port int
+}
+
+type Timestamp time.Time
+
+func (t *Timestamp) String() string {
+	return time.Time(*t).String()
+}
+
+func (t *Timestamp) UnmarshalJSON(b []byte) error {
+	ts, err := strconv.ParseInt(tm, 10, 64)
+	if err != nil {
+		return err
+	}
+
+	*t = Timestamp(time.Unix(ts, 0))
+	return nil
 }
 
 func New() (*VCAP, error) {
