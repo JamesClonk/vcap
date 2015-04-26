@@ -34,7 +34,7 @@ func New() (*VCAP, error) {
 	vcap := &VCAP{}
 
 	if app := os.Getenv("VCAP_APPLICATION"); app != "" {
-		if err := json.Unmarshal([]byte(app), vcap.Application); err != nil {
+		if err := json.Unmarshal([]byte(app), &(vcap.Application)); err != nil {
 			return nil, err
 		}
 	}
