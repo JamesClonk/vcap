@@ -28,13 +28,15 @@ type VCAP struct {
 	}
 	Host     string
 	Port     int
-	Services map[string][]struct {
-		Name        string            `json:"name"`
-		Label       string            `json:"label"`
-		Tags        []string          `json:"tags"`
-		Plan        string            `json:"plan"`
-		Credentials map[string]string `json:"credentials"`
-	}
+	Services map[string][]Service
+}
+
+type Service struct {
+	Name        string                 `json:"name"`
+	Label       string                 `json:"label"`
+	Tags        []string               `json:"tags"`
+	Plan        string                 `json:"plan"`
+	Credentials map[string]interface{} `json:"credentials"`
 }
 
 type Timestamp time.Time
@@ -104,4 +106,15 @@ func New() (*VCAP, error) {
 	}
 
 	return vcap, nil
+}
+
+func (v *VCAP) GetService(name string) *Service {
+	for _, services := range v.Services {
+		for _, service := range services {
+			if service.Name == name {
+				return &service
+			}
+		}
+	}
+	return nil
 }
