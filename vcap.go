@@ -3,6 +3,7 @@ package vcap
 import (
 	"encoding/json"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -25,15 +26,29 @@ type VCAP struct {
 		Started *time.Time `json:"started_at_timestamp"`
 		State   *time.Time `json:"state_timestamp"`
 	}
+	Host string
+	Port int
 }
 
-func New() *VCAP {
+func New() (*VCAP, error) {
 	vcap := &VCAP{}
 
-	applicationJson := os.Getenv("VCAP_APPLICATION")
-	json.Unmarshal([]byte(applicationJson), vcap.Application)
+	if app := os.Getenv("VCAP_APPLICATION"); app != "" {
+		if err := json.Unmarshal([]byte(app), vcap.Application); err != nil {
+			return nil, err
+		}
+	}
 
-	// set defaults in case of local development / missing VCAP_APPLICATION
+	vcap.Host = os.Getenv("VCAP_APP_HOST")
+	if port := os.Getenv("VCAP_APP_PORT"); port != "" {
+		p, err := strconv.ParseInt(port, 10, 32)
+		if err != nil {
+			return nil, err
+		}
+		vcap.Port = int(p)
+	}
+
+	// set some defaults in case of local development / missing VCAP_APPLICATION
 	if vcap.Application.ID == "" {
 		vcap.Application.ID = "123-456-789"
 	}
@@ -52,6 +67,12 @@ func New() *VCAP {
 	if vcap.Application.Port == 0 {
 		vcap.Application.Port = 4000
 	}
+	if vcap.Host == "" {
+		vcap.Host = "localhost"
+	}
+	if vcap.Port == 0 {
+		vcap.Port = 4000
+	}
 
-	return vcap
+	return vcap, nil
 }
